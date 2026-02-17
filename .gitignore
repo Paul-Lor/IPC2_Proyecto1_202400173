@@ -1,0 +1,58 @@
+## -------------------------------
+## Build folders
+## -------------------------------
+[Bb]in/
+[Oo]bj/
+artifacts/
+
+## -------------------------------
+## VS Code
+## -------------------------------
+.vscode/
+*.code-workspace
+
+## -------------------------------
+## Visual Studio (por si lo usas alguna vez)
+## -------------------------------
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## -------------------------------
+## Logs
+## -------------------------------
+*.log
+
+## -------------------------------
+## NuGet
+## -------------------------------
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+
+## -------------------------------
+## Publish output
+## -------------------------------
+publish/
+*.publishsettings
+*.pfx
+
+## -------------------------------
+## OS files
+## -------------------------------
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+## -------------------------------
+## Environment / Secrets
+## -------------------------------
+.env
+appsettings.Development.json
+appsettings.Local.json
