@@ -7,6 +7,7 @@ namespace IPC2_Proyecto1_202400173.Modelos
         private int _totalFilas;
 
         public NodoFila? Cabeza => _cabeza;
+        public NodoFila? Cola => _cola;
         public int TotalFilas => _totalFilas;
 
         public ListaDobleFilas()
