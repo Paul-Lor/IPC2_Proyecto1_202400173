@@ -1,0 +1,38 @@
+## --- Directorios de Compilación ---
+[Bb]in/
+[Oo]bj/
+
+## --- Visual Studio Code ---
+.vscode/
+.vscode/launch.json
+.vscode/tasks.json
+*.code-workspace
+
+## --- Visual Studio (Archivos temporales y de usuario) ---
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+## --- Herramientas de .NET (NuGet y MSBuild) ---
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.log
+
+## --- Publish (Publicación de la App) ---
+publish/
+*.pfx
+*.publishsettings
+
+## --- Archivos del Sistema Operativo ---
+# Windows
+Thumbs.db
+desktop.ini
+# macOS
+.DS_Store
+
+## --- Variables de Entorno / Secretos ---
+.env
+appsettings.Development.json
+appsettings.Local.json
