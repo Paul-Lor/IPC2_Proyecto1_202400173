@@ -1,3 +1,5 @@
+using IPC2_Proyecto1_202400173.Modelos;
+
 namespace IPC2_Proyecto1_202400173.Utilidades
 {
     public class GeneradorGrafico
