@@ -1,4 +1,4 @@
-﻿namespace Proyecto_1
+﻿namespace IPC2_Proyecto1_202400173
 {
     class Program
     {
