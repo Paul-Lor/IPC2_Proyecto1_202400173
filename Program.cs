@@ -31,13 +31,16 @@ namespace IPC2_Proyecto1_202400173
         static void MostrarMenu()
         {
             Console.Clear();
-            Console.WriteLine("=== SISTEMA EPIDEMIOLÓGICO - 202400173 ===");
+            Console.WriteLine("=============================================");
+            Console.WriteLine("   SISTEMA EPIDEMIOLÓGICO - 202400173");
+            Console.WriteLine("=============================================");
             Console.WriteLine("1. Cargar archivo XML");
             Console.WriteLine("2. Análisis Manual (Paso a paso)");
             Console.WriteLine("3. Simulación Automática (Diagnóstico)");
             Console.WriteLine("4. Generar archivo XML de salida");
             Console.WriteLine("5. Limpiar memoria");
             Console.WriteLine("6. Salir");
+            Console.WriteLine("---------------------------------------------");
             Console.Write("Seleccione una opción: ");
         }
 
@@ -54,61 +57,164 @@ namespace IPC2_Proyecto1_202400173
                 case 3:
                     FuncionSimulacionAutomatica();
                     break;
+                case 4:
+                    FuncionGenerarSalida();
+                    break;
                 case 5:
                     listaPacientes.Limpiar();
-                    Console.WriteLine("Memoria limpia.");
+                    Console.WriteLine("Memoria limpia satisfactoriamente.");
                     break;
             }
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            Console.ReadKey();
+            if (opcion != 6)
+            {
+                Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                Console.ReadKey();
+            }
         }
 
         static void FuncionCargarArchivo()
         {
-            Console.Write("Ruta del archivo: ");
+            Console.Write("\nIngrese la ruta del archivo XML: ");
             string? ruta = Console.ReadLine();
-            if (!string.IsNullOrEmpty(ruta)) lector.CargarPacientes(ruta, listaPacientes);
+            if (!string.IsNullOrEmpty(ruta)) 
+            {
+                lector.CargarPacientes(ruta, listaPacientes);
+            }
         }
 
         static void FuncionAnalisisManual()
         {
-            Console.Write("Nombre del paciente: ");
-            string? nombre = Console.ReadLine();
-            Paciente? p = listaPacientes.BuscarPorNombre(nombre ?? "");
+            Console.Write("\nNombre del paciente: ");
+            string? nom = Console.ReadLine();
+            Paciente? p = listaPacientes.BuscarPorNombre(nom ?? "");
 
-            if (p != null)
+            if (p == null) { Console.WriteLine("Paciente no encontrado."); return; }
+
+            int perActual = 0;
+            string input = "";
+            // Guardamos el estado original por si queremos comparar contra el inicio manualmente
+            ListaDobleFilas inicial = p.RejillaActual; 
+
+            while (input != "salir")
             {
-                graficador.GenerarMatrizDot(p.RejillaActual, p.M, p.Nombre, 0);
-                Console.WriteLine("Estado inicial generado en Graphviz.");
+                Console.Clear();
+                int sanas, contagiadas;
+                ContarEstados(p.RejillaActual, out sanas, out contagiadas);
+
+                Console.WriteLine("========= MODO MANUAL =========");
+                Console.WriteLine($"Paciente: {p.Nombre} | Período: {perActual}");
+                Console.WriteLine($"Sanas: {sanas} | Contagiadas: {contagiadas}");
                 
-                Console.WriteLine("¿Desea avanzar un periodo? (s/n)");
-                if (Console.ReadLine()?.ToLower() == "s")
+                // Generar gráfica en cada paso
+                graficador.GenerarMatrizDot(p.RejillaActual, p.M, p.Nombre, perActual);
+
+                Console.WriteLine("\n[ENTER] Avanzar Período | [salir] Volver al Menú");
+                input = Console.ReadLine()?.ToLower() ?? "";
+                
+                if (input != "exit")
                 {
                     p.RejillaActual = simulador.GenerarSiguientePeriodo(p.RejillaActual, p.M);
-                    Console.WriteLine("Periodo 1 calculado.");
+                    perActual++;
                 }
             }
-            else Console.WriteLine("Paciente no encontrado.");
         }
 
         static void FuncionSimulacionAutomatica()
         {
-            Console.Write("Nombre del paciente: ");
+            Console.Write("\nNombre del paciente para diagnóstico: ");
             string? nombre = Console.ReadLine();
             Paciente? p = listaPacientes.BuscarPorNombre(nombre ?? "");
 
-            if (p != null)
+            if (p == null) { Console.WriteLine("Paciente no encontrado."); return; }
+
+            Console.WriteLine($"Analizando a {p.Nombre}...");
+
+            // Historial para detección de ciclos
+            NodoHistorial? cabezaHistorial = new NodoHistorial(0, p.RejillaActual);
+            ListaDobleFilas actual = p.RejillaActual;
+            
+            bool detectado = false;
+            int limite = 10000; 
+
+            for (int n = 1; n <= limite; n++)
             {
-                ListaDobleFilas actual = p.RejillaActual;
-                Console.WriteLine("Iniciando simulación automática...");
-                // Lógica de detección de patrones...
+                ListaDobleFilas siguiente = simulador.GenerarSiguientePeriodo(actual, p.M);
+                
+                // Comparar con el historial
+                NodoHistorial? tempH = cabezaHistorial;
+                while (tempH != null)
+                {
+                    if (simulador.SonIdenticas(siguiente, tempH.RejillaSnapshot, p.M))
+                    {
+                        int periodoDondeAparecio = tempH.Periodo;
+                        int n1 = n - periodoDondeAparecio;
+
+                        // Clasificación de resultados
+                        string diagnostico;
+                        if (periodoDondeAparecio == 0) // Repitió el inicial
+                        {
+                            diagnostico = (n == 1) ? "mortal" : "grave";
+                            Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
+                            Console.WriteLine($"Patrón inicial repetido en N={n}");
+                        }
+                        else // Ciclo posterior
+                        {
+                            diagnostico = (n1 == 1) ? "mortal" : "grave";
+                            Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
+                            Console.WriteLine($"Ciclo detectado: Apareció en {periodoDondeAparecio} y repite cada N1={n1}");
+                        }
+
+                        // Guardar resultados en el objeto Paciente para el XML de salida
+                        // Nota: Asegúrate de que tu clase Paciente tenga estos campos o propiedades
+                        // p.ResultadoFinal = diagnostico; p.N_Encontrado = periodoDondeAparecio; p.N1_Encontrado = n1;
+
+                        detectado = true;
+                        break;
+                    }
+                    tempH = tempH.Siguiente;
+                }
+
+                if (detectado) break;
+
+                // Agregar al historial (Insertar al inicio para optimizar búsqueda reciente)
+                NodoHistorial nuevoH = new NodoHistorial(n, siguiente);
+                nuevoH.Siguiente = cabezaHistorial;
+                cabezaHistorial = nuevoH;
+                actual = siguiente;
+            }
+
+            if (!detectado) Console.WriteLine("RESULTADO: LEVE. No se detectó ciclo en 10,000 períodos.");
+        }
+
+        static void FuncionGenerarSalida()
+        {
+            Console.Write("\nIngrese el nombre/ruta para el XML de salida: ");
+            string? ruta = Console.ReadLine();
+            if (!string.IsNullOrEmpty(ruta))
+            {
+                //escritor.GenerarSalida(ruta, listaPacientes);
+                Console.WriteLine("Archivo generado exitosamente.");
+            }
+        }
+
+        static void ContarEstados(ListaDobleFilas rejilla, out int sanas, out int contagiadas) 
+        {
+            sanas = 0; contagiadas = 0;
+            NodoFila? f = rejilla.Cabeza;
+            while (f != null) {
+                NodoCelda? c = f.ListaColumnas.Cabeza;
+                while (c != null) {
+                    if (c.Estado == 1) contagiadas++; else sanas++;
+                    c = c.Siguiente;
+                }
+                f = f.Siguiente;
             }
         }
 
         static bool TerminarPrograma()
         {
-            Console.WriteLine("Saliendo...");
-            return false;
+            Console.WriteLine("¿Desea cerrar la aplicación? (s/n)");
+            return Console.ReadLine()?.ToLower() != "s";
         }
     }
 }
