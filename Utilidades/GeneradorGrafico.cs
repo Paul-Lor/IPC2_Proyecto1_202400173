@@ -49,7 +49,7 @@ namespace IPC2_Proyecto1_202400173.Utilidades
                     CreateNoWindow = true
                 };
                 Process.Start(startInfo);
-            } catch { /* Ocultar error si dot no está instalado */ }
+            } catch { /* Ocultar error si dot no está instalado (Generación muy lenta XD)*/ }
         }
     }
 }

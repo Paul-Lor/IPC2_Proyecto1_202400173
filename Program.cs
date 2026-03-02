@@ -92,7 +92,7 @@ namespace IPC2_Proyecto1_202400173
 
             int perActual = 0;
             string input = "";
-            // Guardamos el estado original por si queremos comparar contra el inicio manualmente
+            // Guardamos el estado original
             ListaDobleFilas inicial = p.RejillaActual; 
 
             while (input != "salir")
@@ -164,8 +164,7 @@ namespace IPC2_Proyecto1_202400173
                             Console.WriteLine($"Ciclo detectado: Apareció en {periodoDondeAparecio} y repite cada N1={n1}");
                         }
 
-                        // Guardar resultados en el objeto Paciente para el XML de salida
-                        // Nota: Asegúrate de que tu clase Paciente tenga estos campos o propiedades
+                        // Guardar resultados en el objeto Paciente para el XML de salida (me falta)
                         // p.ResultadoFinal = diagnostico; p.N_Encontrado = periodoDondeAparecio; p.N1_Encontrado = n1;
 
                         detectado = true;
@@ -192,7 +191,6 @@ namespace IPC2_Proyecto1_202400173
             string? ruta = Console.ReadLine();
             if (!string.IsNullOrEmpty(ruta))
             {
-                //escritor.GenerarSalida(ruta, listaPacientes);
                 Console.WriteLine("Archivo generado exitosamente.");
             }
         }

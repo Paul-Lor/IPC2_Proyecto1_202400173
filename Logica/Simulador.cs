@@ -12,7 +12,7 @@ namespace IPC2_Proyecto1_202400173.Logica
                 NodoFila? fila1 = r1.BuscarFila(f);
                 NodoFila? fila2 = r2.BuscarFila(f);
 
-                // Si alguna fila no existe en una de las dos (no debería pasar si m es igual)
+                // Si alguna fila no existe en una de las dos
                 if (fila1 == null || fila2 == null) return false;
 
                 for (int c = 1; c <= m; c++)
@@ -50,12 +50,12 @@ namespace IPC2_Proyecto1_202400173.Logica
 
                     if (celdaOriginal != null && celdaNueva != null)
                     {
-                        // Regla 1: Célula contagiada sobrevive con 2 o 3 vecinos
+                        // Regla 1: Célula contagiada sobrevive con 2 o 3 vecinos (ENUNCIADO)
                         if (celdaOriginal.Estado == 1)
                         {
                             celdaNueva.Estado = (vecinos == 2 || vecinos == 3) ? 1 : 0;
                         }
-                        // Regla 2: Célula sana se contagia con exactamente 3 vecinos
+                        // Regla 2: Célula sana se contagia con exactamente 3 vecinos (ENUNCIADO)
                         else
                         {
                             celdaNueva.Estado = (vecinos == 3) ? 1 : 0;
