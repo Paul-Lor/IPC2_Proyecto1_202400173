@@ -4,107 +4,103 @@ namespace IPC2_Proyecto1_202400173.Logica
 {
     public class Simulador
     {
-        // Método principal para avanzar un período
-        public ListaDobleFilas GenerarSiguientePeriodo(ListaDobleFilas rejillaActual, int m)
-        {
-            // Creamos una nueva rejilla vacía para el siguiente periodo
-            ListaDobleFilas nuevaRejilla = GenerarRejillaBase(m);
-
-            for (int f = 1; f <= m; f++)
-            {
-                NodoFila? filaActual = rejillaActual.BuscarFila(f);
-                NodoFila? filaNueva = nuevaRejilla.BuscarFila(f);
-
-                for (int c = 1; c <= m; c++)
-                {
-                    NodoCelda? celdaActual = filaActual?.ListaColumnas.BuscarCelda(c);
-                    int vecinosContagiados = ContarVecinos(rejillaActual, f, c);
-                    
-                    int nuevoEstado = 0;
-
-                    if (celdaActual != null)
-                    {
-                        // REGLA 1: Célula contagiada (Estado 1)
-                        if (celdaActual.Estado == 1)
-                        {
-                            if (vecinosContagiados == 2 || vecinosContagiados == 3)
-                                nuevoEstado = 1; // Sigue contagiada
-                            else
-                                nuevoEstado = 0; // Sana
-                        }
-                        // REGLA 2: Célula sana (Estado 0)
-                        else
-                        {
-                            if (vecinosContagiados == 3)
-                                nuevoEstado = 1; // Se contagia
-                        }
-                    }
-
-                    // Guardamos el resultado en la nueva rejilla
-                    NodoCelda? celdaNueva = filaNueva?.ListaColumnas.BuscarCelda(c);
-                    if (celdaNueva != null) celdaNueva.Estado = nuevoEstado;
-                }
-            }
-            return nuevaRejilla;
-        }
-
-        private int ContarVecinos(ListaDobleFilas rejilla, int f, int c)
-        {
-            int contador = 0;
-            // Coordenadas de los 8 vecinos
-            int[] df = { -1, -1, -1, 0, 0, 1, 1, 1 };
-            int[] dc = { -1, 0, 1, -1, 1, -1, 0, 1 };
-
-            for (int i = 0; i < 8; i++)
-            {
-                int nf = f + df[i];
-                int nc = c + dc[i];
-
-                // Buscamos el nodo vecino en la lista de listas
-                NodoFila? filaVecino = rejilla.BuscarFila(nf);
-                NodoCelda? celdaVecino = filaVecino?.ListaColumnas.BuscarCelda(nc);
-
-                if (celdaVecino != null && celdaVecino.Estado == 1)
-                {
-                    contador++;
-                }
-            }
-            return contador;
-        }
-
-        // Método auxiliar para crear la estructura M x M en blanco
-        private ListaDobleFilas GenerarRejillaBase(int m)
-        {
-            ListaDobleFilas baseR = new ListaDobleFilas();
-            for (int i = 1; i <= m; i++)
-            {
-                baseR.InsertarFila(i);
-                NodoFila? f = baseR.BuscarFila(i);
-                for (int j = 1; j <= m; j++)
-                {
-                    f?.ListaColumnas.InsertarAlFinal(i, j, 0);
-                }
-            }
-            return baseR;
-        }
-
-        public bool SonIguales(ListaDobleFilas r1, ListaDobleFilas r2, int m)
+        // Compara dos rejillas completas para detectar repetición de patrones
+        public bool SonIdenticas(ListaDobleFilas r1, ListaDobleFilas r2, int m)
         {
             for (int f = 1; f <= m; f++)
             {
                 NodoFila? fila1 = r1.BuscarFila(f);
                 NodoFila? fila2 = r2.BuscarFila(f);
 
+                // Si alguna fila no existe en una de las dos
+                if (fila1 == null || fila2 == null) return false;
+
                 for (int c = 1; c <= m; c++)
                 {
-                    NodoCelda? c1 = fila1?.ListaColumnas.BuscarCelda(c);
-                    NodoCelda? c2 = fila2?.ListaColumnas.BuscarCelda(c);
+                    NodoCelda? celda1 = fila1.ListaColumnas.BuscarCelda(c);
+                    NodoCelda? celda2 = fila2.ListaColumnas.BuscarCelda(c);
 
-                    // Si los estados son diferentes en cualquier punto, las rejillas no son iguales
-                    if (c1?.Estado != c2?.Estado) return false;
+                    if (celda1 == null || celda2 == null) return false;
+
+                    // Comparamos el estado (0 o 1)
+                    if (celda1.Estado != celda2.Estado)
+                    {
+                        return false; // A la primera diferencia, ya no son iguales
+                    }
                 }
             }
-            return true;
+            return true; // Si terminó todos los ciclos, son idénticas
+        }
+
+        // Genera el estado de la rejilla para el siguiente periodo
+        public ListaDobleFilas GenerarSiguientePeriodo(ListaDobleFilas actual, int m)
+        {
+            ListaDobleFilas nuevaRejilla = InicializarRejillaVacia(m);
+
+            for (int f = 1; f <= m; f++)
+            {
+                NodoFila? filaActual = actual.BuscarFila(f);
+                NodoFila? filaNueva = nuevaRejilla.BuscarFila(f);
+
+                for (int c = 1; c <= m; c++)
+                {
+                    int vecinos = ContarVecinosContagiados(actual, f, c);
+                    NodoCelda? celdaOriginal = filaActual?.ListaColumnas.BuscarCelda(c);
+                    NodoCelda? celdaNueva = filaNueva?.ListaColumnas.BuscarCelda(c);
+
+                    if (celdaOriginal != null && celdaNueva != null)
+                    {
+                        // Regla 1: Célula contagiada sobrevive con 2 o 3 vecinos (ENUNCIADO)
+                        if (celdaOriginal.Estado == 1)
+                        {
+                            celdaNueva.Estado = (vecinos == 2 || vecinos == 3) ? 1 : 0;
+                        }
+                        // Regla 2: Célula sana se contagia con exactamente 3 vecinos (ENUNCIADO)
+                        else
+                        {
+                            celdaNueva.Estado = (vecinos == 3) ? 1 : 0;
+                        }
+                    }
+                }
+            }
+            return nuevaRejilla;
+        }
+
+        private int ContarVecinosContagiados(ListaDobleFilas rejilla, int f, int c)
+        {
+            int contador = 0;
+            // Evaluamos los 8 vecinos alrededor de la celda (f,c)
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0) continue; // No contarse a sí misma
+
+                    NodoFila? filaVecino = rejilla.BuscarFila(f + i);
+                    NodoCelda? celdaVecino = filaVecino?.ListaColumnas.BuscarCelda(c + j);
+
+                    if (celdaVecino != null && celdaVecino.Estado == 1)
+                    {
+                        contador++;
+                    }
+                }
+            }
+            return contador;
+        }
+
+        private ListaDobleFilas InicializarRejillaVacia(int m)
+        {
+            ListaDobleFilas r = new ListaDobleFilas();
+            for (int i = 1; i <= m; i++)
+            {
+                r.InsertarFila(i);
+                NodoFila? f = r.BuscarFila(i);
+                for (int j = 1; j <= m; j++)
+                {
+                    f?.ListaColumnas.InsertarAlFinal(i, j, 0);
+                }
+            }
+            return r;
         }
     }
 }
