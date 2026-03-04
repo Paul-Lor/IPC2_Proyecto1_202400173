@@ -10,6 +10,7 @@ namespace IPC2_Proyecto1_202400173
     {
         static ListaDoblePacientes listaPacientes = new ListaDoblePacientes();
         static LectorXML lector = new LectorXML();
+        static EscritorXML escritor = new EscritorXML();
         static Simulador simulador = new Simulador();
         static GeneradorGrafico graficador = new GeneradorGrafico();
 
@@ -156,12 +157,18 @@ namespace IPC2_Proyecto1_202400173
                             diagnostico = (n == 1) ? "mortal" : "grave";
                             Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
                             Console.WriteLine($"Patrón inicial repetido en N={n}");
+                            p.Resultado = (n == 1) ? "MORTAL" : "GRAVE";
+                            p.N = n;
+                            p.N1 = 0;
                         }
                         else // Ciclo posterior
                         {
                             diagnostico = (n1 == 1) ? "mortal" : "grave";
                             Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
                             Console.WriteLine($"Ciclo detectado: Apareció en {periodoDondeAparecio} y repite cada N1={n1}");
+                            p.Resultado = (n1 == 1) ? "MORTAL" : "GRAVE";
+                            p.N = periodoDondeAparecio;
+                            p.N1 = n1;
                         }
 
                         // Guardar resultados en el objeto Paciente para el XML de salida (me falta)
@@ -191,6 +198,7 @@ namespace IPC2_Proyecto1_202400173
             string? ruta = Console.ReadLine();
             if (!string.IsNullOrEmpty(ruta))
             {
+                escritor.GenerarArchivoSalida(ruta, listaPacientes);
                 Console.WriteLine("Archivo generado exitosamente.");
             }
         }
