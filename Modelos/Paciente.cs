@@ -13,6 +13,10 @@ namespace IPC2_Proyecto1_202400173.Modelos
         public int Edad => _edad;
         public int M => _m;
         public int PeriodosMaximos => _periodosMaximos;
+
+        public string Resultado { get; set; } = "LEVE"; // Siempre inicia como "leve"
+        public int N { get; set; } = 0;
+        public int N1 { get; set; } = 0;
         
         public ListaDobleFilas RejillaActual
         {
