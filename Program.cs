@@ -32,17 +32,30 @@ namespace IPC2_Proyecto1_202400173
         static void MostrarMenu()
         {
             Console.Clear();
-            Console.WriteLine("=============================================");
-            Console.WriteLine("   SISTEMA EPIDEMIOLÓGICO - 202400173");
-            Console.WriteLine("=============================================");
-            Console.WriteLine("1. Cargar archivo XML");
-            Console.WriteLine("2. Análisis Manual (Paso a paso)");
-            Console.WriteLine("3. Simulación Automática (Diagnóstico)");
-            Console.WriteLine("4. Generar archivo XML de salida");
-            Console.WriteLine("5. Limpiar memoria");
-            Console.WriteLine("6. Salir");
-            Console.WriteLine("---------------------------------------------");
-            Console.Write("Seleccione una opción: ");
+            
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+            ╔══════════════════════════════════════════════════════╗
+            ║        SISTEMA DE ANÁLISIS EPIDEMIOLÓGICO            ║
+            ║             Registro: 202400173                      ║
+            ╚══════════════════════════════════════════════════════╝");
+            Console.ResetColor();
+
+            Console.WriteLine("\n  [:v] MENÚ PRINCIPAL:");
+            Console.WriteLine("  ────────────────────────────────────────");
+            
+            Console.WriteLine("  [1] Cargar Pacientes (XML)");
+            Console.WriteLine("  [2] Análisis Manual (Paso a paso)");
+            Console.WriteLine("  [3] Simulación Automática (Diagnóstico)");
+            Console.WriteLine("  [4] Generar Reporte de Salida (XML)");
+            Console.WriteLine("  [5] Limpiar Memoria");
+            
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("  [6] Salir del Programa");
+            Console.ResetColor();
+            
+            Console.WriteLine("  ────────────────────────────────────────");
+            Console.Write("  > Seleccione una opción: ");
         }
 
         static void EjecutarOpcion(int opcion)
@@ -68,13 +81,24 @@ namespace IPC2_Proyecto1_202400173
             }
             if (opcion != 6)
             {
-                Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                PresionarParaContinuar();
                 Console.ReadKey();
             }
         }
 
+        static void PresionarParaContinuar()
+        {
+            Console.WriteLine("\n-----------------------------------------");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("Presione cualquier tecla para volver al menú...");
+            Console.ResetColor();
+        }
+
         static void FuncionCargarArchivo()
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\nIniciando lectura de archivo...");
+            Console.ResetColor();
             Console.Write("\nIngrese la ruta del archivo XML: ");
             string? ruta = Console.ReadLine();
             if (!string.IsNullOrEmpty(ruta)) 
@@ -126,9 +150,18 @@ namespace IPC2_Proyecto1_202400173
             string? nombre = Console.ReadLine();
             Paciente? p = listaPacientes.BuscarPorNombre(nombre ?? "");
 
-            if (p == null) { Console.WriteLine("Paciente no encontrado."); return; }
+            if (p == null) { 
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Paciente no encontrado.");
+                Console.ResetColor(); 
+                return; 
+            }
 
-            Console.WriteLine($"Analizando a {p.Nombre}...");
+            Console.CursorVisible = false;
+            Console.WriteLine($"\nIniciando secuenciación genómica: {p.Nombre}");
+            
+            char[] spinner = { '|', '/', '-', '\\' }; // Spinner para animación
+            int spinnerIndex = 0;
 
             // Historial para detección de ciclos
             NodoHistorial? cabezaHistorial = new NodoHistorial(0, p.RejillaActual);
@@ -139,6 +172,12 @@ namespace IPC2_Proyecto1_202400173
 
             for (int n = 1; n <= limite; n++)
             {
+
+                Console.Write($"\r    [{spinner[spinnerIndex]}] Analizando periodo: {n} ... ");
+                spinnerIndex = (spinnerIndex + 1) % spinner.Length;
+
+                Thread.Sleep(500); // Pausa de medio segundo
+
                 ListaDobleFilas siguiente = simulador.GenerarSiguientePeriodo(actual, p.M);
                 
                 // Comparar con el historial
@@ -150,30 +189,26 @@ namespace IPC2_Proyecto1_202400173
                         int periodoDondeAparecio = tempH.Periodo;
                         int n1 = n - periodoDondeAparecio;
 
-                        // Clasificación de resultados
-                        string diagnostico;
                         if (periodoDondeAparecio == 0) // Repitió el inicial
                         {
-                            diagnostico = (n == 1) ? "mortal" : "grave";
-                            Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
-                            Console.WriteLine($"Patrón inicial repetido en N={n}");
                             p.Resultado = (n == 1) ? "MORTAL" : "GRAVE";
                             p.N = n;
                             p.N1 = 0;
                         }
                         else // Ciclo posterior
                         {
-                            diagnostico = (n1 == 1) ? "mortal" : "grave";
-                            Console.WriteLine($"\nRESULTADO: {diagnostico.ToUpper()}");
-                            Console.WriteLine($"Ciclo detectado: Apareció en {periodoDondeAparecio} y repite cada N1={n1}");
                             p.Resultado = (n1 == 1) ? "MORTAL" : "GRAVE";
                             p.N = periodoDondeAparecio;
                             p.N1 = n1;
                         }
 
-                        // Guardar resultados en el objeto Paciente para el XML de salida (me falta)
-                        // p.ResultadoFinal = diagnostico; p.N_Encontrado = periodoDondeAparecio; p.N1_Encontrado = n1;
-
+                        Console.WriteLine("\n\n  ┌──────────────────────────────────────────┐");
+                        Console.ForegroundColor = p.Resultado == "mortal" ? ConsoleColor.Red : ConsoleColor.Yellow;
+                        Console.WriteLine($"  │  DIAGNÓSTICO: {p.Resultado.ToUpper().PadRight(26)} │");
+                        Console.ResetColor();
+                        Console.WriteLine($"  │  N  encontrado: {p.N.ToString().PadRight(24)} │");
+                        Console.WriteLine($"  │  N1 encontrado: {p.N1.ToString().PadRight(24)} │");
+                        Console.WriteLine("  └──────────────────────────────────────────┘");
                         detectado = true;
                         break;
                     }
@@ -189,7 +224,14 @@ namespace IPC2_Proyecto1_202400173
                 actual = siguiente;
             }
 
-            if (!detectado) Console.WriteLine("RESULTADO: LEVE. No se detectó ciclo en 10,000 períodos.");
+            if (!detectado)
+            {
+                p.Resultado = "LEVE";
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n\nResultado: LEVE. El virus se disipó o es inofensivo.");
+                Console.ResetColor();
+            }
+            Console.CursorVisible = true; 
         }
 
         static void FuncionGenerarSalida()
@@ -199,7 +241,9 @@ namespace IPC2_Proyecto1_202400173
             if (!string.IsNullOrEmpty(ruta))
             {
                 escritor.GenerarArchivoSalida(ruta, listaPacientes);
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Archivo generado exitosamente.");
+                Console.ResetColor();
             }
         }
 
