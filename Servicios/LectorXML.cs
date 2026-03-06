@@ -52,11 +52,15 @@ namespace IPC2_Proyecto1_202400173.Servicios
                     Paciente nuevoPaciente = new Paciente(nombre, edad, m, periodos, rejillaNueva);
                     listaGlobal.Insertar(nuevoPaciente);
                 }
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Archivo cargado exitosamente.");
+                Console.ResetColor();
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Error al cargar el archivo: {ex.Message}");
+                Console.ResetColor();
             }
         }
 
