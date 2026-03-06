@@ -1,0 +1,63 @@
+classDiagram
+    class NodoCelda {
+        +int fila
+        +int columna
+        +int estado
+        +NodoCelda siguiente
+    }
+
+    class ListaDobleColumnas {
+        +NodoCelda cabeza
+        +Insertar(f, c, estado) void
+        +Buscar(c) NodoCelda
+    }
+
+    class NodoFila {
+        +int indiceFila
+        +ListaDobleColumnas listaColumnas
+        +NodoFila siguiente
+    }
+
+    class ListaDobleFilas {
+        +NodoFila cabeza
+        +Insertar(f, c, estado) void
+        +ObtenerEstado(f, c) int
+    }
+
+    class Paciente {
+        +string nombre
+        +int edad
+        +int periodosMaximos
+        +int m
+        +ListaDobleFilas rejillaActual
+        +string resultado
+        +int n_resultado
+        +int n1_resultado
+        +Paciente siguiente
+    }
+
+    class Simulador {
+        +GenerarSiguientePeriodo(rejilla, m) ListaDobleFilas
+        +ContarVecinos(rejilla, f, c, m) int
+        +SonIdenticas(r1, r2, m) bool
+        +CopiarRejilla(original, m) ListaDobleFilas
+    }
+
+    class LectorXML {
+        +CargarPacientes(ruta) ListaDoblePacientes
+    }
+
+    class EscritorXML {
+        +GenerarArchivoSalida(ruta, lista) void
+    }
+
+    class GeneradorGrafico {
+        +GenerarMatrizDot(rejilla, m, nombre, periodo) void
+    }
+
+    Paciente "1" *-- "1" ListaDobleFilas : tiene
+    ListaDobleFilas "1" *-- "n" NodoFila : se compone de
+    NodoFila "1" *-- "1" ListaDobleColumnas : contiene
+    ListaDobleColumnas "1" *-- "n" NodoCelda : contiene
+    Simulador ..> ListaDobleFilas : procesa
+    GeneradorGrafico ..> ListaDobleFilas : grafica
