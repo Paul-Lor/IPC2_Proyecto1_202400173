@@ -109,16 +109,22 @@ namespace IPC2_Proyecto1_202400173
 
         static void FuncionAnalisisManual()
         {
-            Console.Write("\nNombre del paciente: ");
+            Console.Write("\nIngrese el nombre del paciente: ");
             string? nom = Console.ReadLine();
             Paciente? p = listaPacientes.BuscarPorNombre(nom ?? "");
 
-            if (p == null) { Console.WriteLine("Paciente no encontrado."); return; }
+            if (p == null) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(" [X] Error: Paciente no encontrado.");
+                Console.ResetColor();
+                return;
+            }
 
+            // Rejilla inicial para tener una referencia base (N)
+            ListaDobleFilas rejillaOriginal = p.RejillaActual; 
+            ListaDobleFilas? rejillaAnterior = null; // Para detectar Mortal (N1=1)
             int perActual = 0;
             string input = "";
-            // Guardamos el estado original
-            ListaDobleFilas inicial = p.RejillaActual; 
 
             while (input != "salir")
             {
@@ -126,18 +132,53 @@ namespace IPC2_Proyecto1_202400173
                 int sanas, contagiadas;
                 ContarEstados(p.RejillaActual, out sanas, out contagiadas);
 
-                Console.WriteLine("========= MODO MANUAL =========");
-                Console.WriteLine($"Paciente: {p.Nombre} | Período: {perActual}");
-                Console.WriteLine($"Sanas: {sanas} | Contagiadas: {contagiadas}");
-                
-                // Generar gráfica en cada paso
-                graficador.GenerarMatrizDot(p.RejillaActual, p.M, p.Nombre, perActual);
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("╔══════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                LABORATORIO DE ANÁLISIS               ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════╝");
+                Console.ResetColor();
 
-                Console.WriteLine("\n[ENTER] Avanzar Período | [salir] Volver al Menú");
-                input = Console.ReadLine()?.ToLower() ?? "";
-                
-                if (input != "exit")
+                Console.WriteLine($"  Paciente: {p.Nombre.PadRight(20)} Periodo: {perActual}");
+                Console.WriteLine($"  Sanas: {sanas} | Contagiadas: {contagiadas}");
+                Console.WriteLine("  ──────────────────────────────────────────────────────");
+
+                // --- Detectar Alertas por periodo ---
+                if (perActual > 0 && rejillaAnterior != null)
                 {
+                    // 1. Detección de MORTAL (N1 = 1): ¿es igual al periodo anterior?
+                    if (simulador.SonIdenticas(p.RejillaActual, rejillaAnterior, p.M))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"  DIAGNÓSTICO: MORTAL DETECTADO (N1 = 1)");
+                        Console.WriteLine($"     La enfermedad se ha estabilizado en el periodo {perActual - 1}.");
+                        Console.ResetColor();
+                    }
+                    // 2. Detección de GRAVE (Regresó al inicial):
+                    else if (simulador.SonIdenticas(p.RejillaActual, rejillaOriginal, p.M))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"  DIAGNÓSTICO: GRAVE / OSCILANTE");
+                        Console.WriteLine($"     La muestra regresó al estado inicial (N = {perActual}).");
+                        Console.ResetColor();
+                    }
+                }
+
+                // --- Generar gráfica con graphviz ---
+                graficador.GenerarMatrizDot(p.RejillaActual, p.M, p.Nombre, perActual);
+                Console.WriteLine("\n  [Generando visualización .dot ...]");
+                
+                // --- Manejo de entrada ---
+                Console.WriteLine("\n  ──────────────────────────────────────────────────────");
+                Console.WriteLine("  [ ENTER ] -> Siguiente periodo");
+                Console.WriteLine("  [ SALIR ] -> Finalizar análisis");
+                Console.Write("\n  Acción: ");
+                
+                input = Console.ReadLine()?.ToLower() ?? "";
+
+                if (input != "salir")
+                {
+                    // Avanzar al siguiente periodo pero guardando el estado actual para comparación
+                    rejillaAnterior = p.RejillaActual;
                     p.RejillaActual = simulador.GenerarSiguientePeriodo(p.RejillaActual, p.M);
                     perActual++;
                 }
