@@ -19,10 +19,14 @@ namespace IPC2_Proyecto1_202400173.Utilidades
             using (StreamWriter sw = new StreamWriter(dotPath))
             {
                 sw.WriteLine("digraph G {");
-                sw.WriteLine("  node [shape=plaintext]");
-                sw.WriteLine($"  label=\"Paciente: {nombre} | Período: {periodo}\"");
+                sw.WriteLine("  bgcolor=\"#2D2D2D\"");
+                sw.WriteLine("  node [shape=plaintext fontcolor=white fontname=\"Segoe UI, Arial\"]");
+                
+                sw.WriteLine($"  label=\"PATRÓN VIRAL: {nombreLimpio} \\n PERÍODO: {periodo}\"");
+                sw.WriteLine("  labelloc=\"t\" fontsize=20");
+
                 sw.WriteLine("  tabla [label=<");
-                sw.WriteLine("    <TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\">");
+                sw.WriteLine("    <TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" COLOR=\"#555555\">");
 
                 NodoFila? fActual = rejilla.Cabeza;
                 while (fActual != null)
@@ -31,8 +35,8 @@ namespace IPC2_Proyecto1_202400173.Utilidades
                     NodoCelda? cActual = fActual.ListaColumnas.Cabeza;
                     while (cActual != null)
                     {
-                        string color = (cActual.Estado == 1) ? "BGCOLOR=\"#4A7EBB\"" : "BGCOLOR=\"white\"";
-                        sw.WriteLine($"        <TD WIDTH=\"25\" HEIGHT=\"25\" {color}></TD>");
+                        string color = (cActual.Estado == 1) ? "#00A8E8" : "#3C3C3C";
+                        sw.WriteLine($"        <TD WIDTH=\"25\" HEIGHT=\"25\" BGCOLOR=\"{color}\" FIXEDSIZE=\"TRUE\"></TD>");
                         cActual = cActual.Siguiente;
                     }
                     sw.WriteLine("      </TR>");
@@ -42,6 +46,12 @@ namespace IPC2_Proyecto1_202400173.Utilidades
                 sw.WriteLine("}");
             }
 
+            EjecutarDot(dotPath, pngPath);
+            
+        }
+
+        private void EjecutarDot(string dotPath, string pngPath)
+        {
             try {
                 ProcessStartInfo startInfo = new ProcessStartInfo("dot") {
                     Arguments = $"-Tpng \"{dotPath}\" -o \"{pngPath}\"",
@@ -49,7 +59,7 @@ namespace IPC2_Proyecto1_202400173.Utilidades
                     CreateNoWindow = true
                 };
                 Process.Start(startInfo);
-            } catch { /* Ocultar error si dot no está instalado (Generación muy lenta XD)*/ }
+            } catch { /* Dot no instalado */ }
         }
     }
 }
