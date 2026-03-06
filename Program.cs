@@ -152,6 +152,9 @@ namespace IPC2_Proyecto1_202400173
                         Console.WriteLine($"  DIAGNÓSTICO: MORTAL DETECTADO (N1 = 1)");
                         Console.WriteLine($"     La enfermedad se ha estabilizado en el periodo {perActual - 1}.");
                         Console.ResetColor();
+                        p.Resultado = "MORTAL";
+                        p.N = perActual - 1; 
+                        p.N1 = 1;
                     }
                     // 2. Detección de GRAVE (Regresó al inicial):
                     else if (simulador.SonIdenticas(p.RejillaActual, rejillaOriginal, p.M))
@@ -160,6 +163,9 @@ namespace IPC2_Proyecto1_202400173
                         Console.WriteLine($"  DIAGNÓSTICO: GRAVE / OSCILANTE");
                         Console.WriteLine($"     La muestra regresó al estado inicial (N = {perActual}).");
                         Console.ResetColor();
+                        p.Resultado = "GRAVE";
+                        p.N = 0;
+                        p.N1= perActual;
                     }
                 }
 
@@ -183,6 +189,7 @@ namespace IPC2_Proyecto1_202400173
                     perActual++;
                 }
             }
+            p.RejillaActual = rejillaOriginal; // Restaurar estado original al finalizar
         }
 
         static void FuncionSimulacionAutomatica()
