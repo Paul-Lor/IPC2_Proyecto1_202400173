@@ -119,7 +119,23 @@ namespace IPC2_Proyecto1_202400173
                 Console.ResetColor();
                 return;
             }
-
+            if (p != null)
+            {
+                Console.WriteLine ( " Ingrese la coordenada en i donde desea que esté la celula resistente");
+                    int? coordenadai = Console.ReadLine();
+                        if(coordenadai >= 0 && coordenadai <= m)
+                        Console.WriteLinea("Ingrese la coordeana en j donde desea que esté la célula resistente");
+                        int coordenadaj = Console.ReadLine();
+                            if (coordenadaj >= 0 && coordenadaj <=m)
+                            {
+                                
+                            }
+                        if(coordenadai j < 0 || coordenadas j > m)
+                        Console.WriteLine ("La coordenada no cumple con los requisitos")
+                        return;
+                        
+            }
+                
 
 
             // Rejilla inicial para tener una referencia base (N)
