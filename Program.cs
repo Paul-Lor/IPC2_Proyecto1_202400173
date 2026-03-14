@@ -120,6 +120,8 @@ namespace IPC2_Proyecto1_202400173
                 return;
             }
 
+
+
             // Rejilla inicial para tener una referencia base (N)
             ListaDobleFilas rejillaOriginal = p.RejillaActual; 
             ListaDobleFilas? rejillaAnterior = null; // Para detectar Mortal (N1=1)
@@ -141,6 +143,7 @@ namespace IPC2_Proyecto1_202400173
                 Console.WriteLine($"  Paciente: {p.Nombre.PadRight(20)} Periodo: {perActual}");
                 Console.WriteLine($"  Sanas: {sanas} | Contagiadas: {contagiadas}");
                 Console.WriteLine("  ──────────────────────────────────────────────────────");
+
 
                 // --- Detectar Alertas por periodo ---
                 if (perActual > 0 && rejillaAnterior != null)
@@ -216,7 +219,7 @@ namespace IPC2_Proyecto1_202400173
             ListaDobleFilas actual = p.RejillaActual;
             
             bool detectado = false;
-            int limite = 10000; 
+            int limite = p.PeriodosMaximos; 
 
             for (int n = 1; n <= limite; n++)
             {

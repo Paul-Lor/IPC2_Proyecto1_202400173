@@ -4,6 +4,8 @@ namespace IPC2_Proyecto1_202400173.Logica
 {
     public class Simulador
     {
+        private int coordenadas;
+
         // Compara dos rejillas completas para detectar repetición de patrones
         public bool SonIdenticas(ListaDobleFilas r1, ListaDobleFilas r2, int m)
         {
@@ -87,7 +89,28 @@ namespace IPC2_Proyecto1_202400173.Logica
             }
             return contador;
         }
-
+        
+        private int InsertarCelula(ListaDobleFilas r1, int f, int c, int estado, int m)
+        {
+            if (f < 1 || f > m || c < 1 || c > m)
+            {
+                return 0; 
+            }
+            NodoFila? fila = r1.BuscarFila(f);
+            if (fila == null)
+            {
+                return 0; 
+            }
+            NodoCelda? celda = fila.ListaColumnas.BuscarCelda(c);
+            if (celda == null)
+            {
+                return 0; 
+            }
+            celda.Estado = estado;
+            return 1; 
+        }
+            
+        }
         private ListaDobleFilas InicializarRejillaVacia(int m)
         {
             ListaDobleFilas r = new ListaDobleFilas();
